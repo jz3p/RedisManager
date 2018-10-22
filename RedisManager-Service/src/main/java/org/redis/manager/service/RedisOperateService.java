@@ -1,7 +1,5 @@
 package org.redis.manager.service;
 
-import org.redis.manager.shell.SftpFactory;
-import org.redis.manager.shell.client.SftpInterface;
 import org.redis.manager.shell.client.ShellClient;
 import org.redis.manager.util.RedisOperateUtil;
 import org.springframework.stereotype.Service;

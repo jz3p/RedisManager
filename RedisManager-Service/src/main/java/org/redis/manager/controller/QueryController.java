@@ -1,8 +1,10 @@
 package org.redis.manager.controller;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import org.redis.manager.model.ClusterServerCache;
+import org.redis.manager.model.RequestModel;
 import org.redis.manager.model.ScanPage;
-import org.redis.manager.model.ScriptModel;
 import org.redis.manager.service.QueryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -49,16 +51,24 @@ public class QueryController extends BaseController {
         return SUCCESS();
     }
 
-    @RequestMapping(value = "/lua", method = RequestMethod.POST)
+    @RequestMapping(value = "/deletes", method = RequestMethod.POST)
     @ResponseBody
-    public Object execute(ScriptModel model) throws Exception {
-        Object data = queryService.scriptExecute(model.getCluster(), model.getScript());
+    public Object deleteByRegex(RequestModel model) throws Exception {
+        Object data = queryService.deleteKeysByRegex(model);
         return SUCCESS(data);
     }
 
-    @RequestMapping(value = "/deletes", method = RequestMethod.POST)
+    @RequestMapping(value = "/lua", method = RequestMethod.POST)
     @ResponseBody
-    public Object deleteByRegex(ScriptModel model) throws Exception {
+    public Object execute(RequestModel model) throws Exception {
+        Object data = queryService.scriptExecute(model.getClusterId(), model.getParam());
+        return SUCCESS(data);
+    }
+
+
+    @RequestMapping(value = "/deleteKeys", method = RequestMethod.POST)
+    @ResponseBody
+    public Object deleteByParam(@RequestBody RequestModel model) throws Exception {
         Object data = queryService.deleteKeysByRegex(model);
         return SUCCESS(data);
     }

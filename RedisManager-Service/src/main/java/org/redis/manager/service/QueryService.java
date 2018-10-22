@@ -2,15 +2,18 @@ package org.redis.manager.service;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
 import org.redis.manager.cluster.RedisClusterScan;
-import org.redis.manager.leveldb.D_ClusterInfo;
+import org.redis.manager.cluster.RedisClusterTerminal;
 import org.redis.manager.leveldb.D_ClusterNode_Master;
 import org.redis.manager.leveldb.D_ClusterNode_Tree;
 import org.redis.manager.leveldb.D_RedisClusterNode;
+import org.redis.manager.model.RequestModel;
 import org.redis.manager.model.ScanPage;
-import org.redis.manager.model.ScriptModel;
+import org.redis.manager.model.enums.RedisClusterRole;
 import org.redis.manager.model.enums.RedisNodeStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -69,17 +72,23 @@ public class QueryService {
         return true;
     }
 
-    public Object deleteKeysByRegex(ScriptModel model) throws Exception{
-        Set<HostAndPort> masters = getMasters(model.getCluster());
-        for (HostAndPort hostAndPort : masters){
-            operateService.init(hostAndPort,"root" , "1qaz@WSX");
-            operateService.delete(model.getScript());
+    public Object deleteKeysByRegex(RequestModel model) throws Exception {
+        Set<HostAndPort> masters;
+        if (StringUtils.isBlank(model.getClusterId())) {
+            List<D_RedisClusterNode> nodes = getClusterNodes(model.getHostAndPort());
+            if (Objects.nonNull(nodes)){
+                masters = getMasters(nodes);
+            }else {
+                return null;
+            }
+        } else {
+            masters = getMasters(model.getClusterId());
         }
         RedisClusterScan scan = new RedisClusterScan(masters);
-        return scan.deleteKeysByRegex(model.getScript());
+        return scan.deleteKeysByRegex(model.getParam());
     }
 
-    public Object scriptExecute(String cluster,String script) throws Exception{
+    public Object scriptExecute(String cluster, String script) throws Exception {
         Set<HostAndPort> masters = getMasters(cluster);
         RedisClusterScan scan = new RedisClusterScan(masters);
         return scan.scriptExecute(script);
@@ -159,5 +168,34 @@ public class QueryService {
             }
         }
         return masters;
+    }
+
+    /**
+     * 获取master列表
+     *
+     * @param cluster
+     * @return
+     * @throws Exception
+     */
+    private Set<HostAndPort> getMasters(List<D_RedisClusterNode> cluster) throws Exception {
+        Set<HostAndPort> masters = new HashSet<HostAndPort>();
+        //每一个分片获取一个节点
+        for (D_RedisClusterNode nodes : cluster) {
+            RedisClusterRole role = nodes.getRole();
+            if (RedisClusterRole.MASTER.name().equals(role.name())) {
+                masters.add(new HostAndPort(nodes.getHost(), nodes.getPort()));
+            }
+        }
+        return masters;
+    }
+
+    private List<D_RedisClusterNode> getClusterNodes(String hostAndPort) throws Exception {
+        if (Objects.isNull(hostAndPort)) {
+            return null;
+        }
+        String[] hosts = hostAndPort.split(",");
+        String[] hostPort = hosts[0].split(":");
+        RedisClusterTerminal terminal = new RedisClusterTerminal(hostPort[0], Integer.valueOf(hostPort[1]));
+        return clusterNodeService.getClusterNodesByRedis(null, terminal);
     }
 }

@@ -49,8 +49,8 @@ app.controller('ClusterQueryCtrl', function ($scope, $state, $stateParams, $http
 
     $scope.dbSize = function () {
         model = {
-            script: "return redis.call('dbsize'), 0",
-            cluster: $scope.id
+            param: "return redis.call('dbsize'), 0",
+            clusterId: $scope.id
         };
 
         var loading = $modal.open({
@@ -74,8 +74,8 @@ app.controller('ClusterQueryCtrl', function ($scope, $state, $stateParams, $http
         $Popup.confirm('警告', '确定要删除{' + key + '}匹配到的所有key?').then(function (flag) {
             if (flag) {
                 model = {
-                    script: key,
-                    cluster: $scope.id
+                    param: key,
+                    clusterId: $scope.id
                 };
                 var loading = $modal.open({
                     templateUrl: 'tpl/app/modal/loading.html'

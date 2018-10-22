@@ -94,7 +94,7 @@ public class RedisClusterScan{
 
     public Object deleteKeysByRegex(String regex){
 	    Map<String,Object> result = new HashMap<>(16);
-        for (int i=0;i<nodes.length;i++){
+        for (int i=0 ; i<nodes.length ; i++){
             HostAndPort hp = nodes[i];
             Jedis jedis = new Jedis(hp.getHost(), hp.getPort(),3000);
             try {

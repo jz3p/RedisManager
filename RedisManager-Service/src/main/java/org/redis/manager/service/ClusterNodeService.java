@@ -53,6 +53,7 @@ public class ClusterNodeService {
 	public List<D_RedisClusterNode> getAllClusterNodes(String cluster) throws Exception{
 		return LevelTable.getAll(cluster, D_RedisClusterNode.class);
 	}
+
 	
 	/**
 	 * 查询指定集群的所有node节点
