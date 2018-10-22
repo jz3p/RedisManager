@@ -12,8 +12,8 @@ app.controller('ClusterQueryCtrl', function ($scope, $state, $stateParams, $http
     };
 
     var model = {
-        script: null,
-        cluster: $scope.id
+        param: null,
+        clusterId: $scope.id
     };
 
     $scope.search = function (key, flush) {
