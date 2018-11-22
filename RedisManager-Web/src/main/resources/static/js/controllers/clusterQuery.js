@@ -59,7 +59,7 @@ app.controller('ClusterQueryCtrl', function ($scope, $state, $stateParams, $http
         $timeout(function () {
             loading.close();
         }, 3000);
-        $http.post('query/lua', model).success(function (response) {
+        $http.post('query/keys', model).success(function (response) {
             loading.close();
             $scope.query.info = response.data;
         });

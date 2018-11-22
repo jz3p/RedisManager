@@ -1,7 +1,5 @@
 package org.redis.manager.controller;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import org.redis.manager.model.ClusterServerCache;
 import org.redis.manager.model.RequestModel;
 import org.redis.manager.model.ScanPage;
@@ -12,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/query")
 public class QueryController extends BaseController {
+
 
     @Autowired
     QueryService queryService;
@@ -54,11 +53,11 @@ public class QueryController extends BaseController {
     @RequestMapping(value = "/deletes", method = RequestMethod.POST)
     @ResponseBody
     public Object deleteByRegex(RequestModel model) throws Exception {
-        Object data = queryService.deleteKeysByRegex(model);
+        Object data = queryService.deleteByLinuxCommand(model);
         return SUCCESS(data);
     }
 
-    @RequestMapping(value = "/lua", method = RequestMethod.POST)
+    @RequestMapping(value = "/keys", method = RequestMethod.POST)
     @ResponseBody
     public Object execute(RequestModel model) throws Exception {
         Object data = queryService.scriptExecute(model.getClusterId(), model.getParam());

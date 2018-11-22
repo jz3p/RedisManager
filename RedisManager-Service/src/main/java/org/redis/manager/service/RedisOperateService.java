@@ -13,8 +13,8 @@ import redis.clients.jedis.HostAndPort;
  */
 @Service
 public class RedisOperateService {
-    ShellClient client = null;
-    RedisOperateUtil operateUtil = null;
+    private ShellClient client = null;
+    private RedisOperateUtil operateUtil = null;
 
     public void init(HostAndPort hp, String user, String pass) throws Exception{
         client = new ShellClient(hp.getHost(), user, pass);

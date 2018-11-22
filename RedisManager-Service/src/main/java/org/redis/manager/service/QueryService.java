@@ -15,7 +15,10 @@ import org.redis.manager.model.RequestModel;
 import org.redis.manager.model.ScanPage;
 import org.redis.manager.model.enums.RedisClusterRole;
 import org.redis.manager.model.enums.RedisNodeStatus;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import redis.clients.jedis.HostAndPort;
@@ -23,6 +26,14 @@ import redis.clients.jedis.JedisCluster;
 
 @Service
 public class QueryService {
+
+    protected static Logger logger = LoggerFactory.getLogger(QueryService.class);
+
+    @Value("${linux.user}")
+    private String user;
+
+    @Value("${linux.pass}")
+    private String pass;
 
     @Autowired
     ClusterNodeService clusterNodeService;
@@ -32,6 +43,7 @@ public class QueryService {
     RedisOperateService operateService;
 
     public ScanPage scan(String cluster, ScanPage scanPage) throws Exception {
+        scanPage.setClient(0);
         if (scanPage.getQuery().contains("*")) {
             return query(cluster, scanPage);
         } else {
@@ -197,5 +209,16 @@ public class QueryService {
         String[] hostPort = hosts[0].split(":");
         RedisClusterTerminal terminal = new RedisClusterTerminal(hostPort[0], Integer.valueOf(hostPort[1]));
         return clusterNodeService.getClusterNodesByRedis(null, terminal);
+    }
+    
+    public Object deleteByLinuxCommand(RequestModel model) throws Exception {
+        Set<HostAndPort> masters = getMasters(model.getClusterId());
+        for (HostAndPort hostAndPort : masters) {
+            operateService.init(hostAndPort, user, pass);
+            logger.info("connect to host:[{}:{}]:",hostAndPort.getHost(),hostAndPort.getPort());
+            operateService.delete(model.getParam());
+            logger.info("delete success");
+        }
+        return 0;
     }
 }
